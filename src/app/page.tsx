@@ -1,9 +1,9 @@
 import React from "react";
+import Welcome from "../components/Welcome";
 
  function Home() {
   return (
-    <div>
-    </div>
+    <Welcome />
   );
 }
 export default Home;
