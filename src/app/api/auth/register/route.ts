@@ -7,17 +7,16 @@ export async function POST(req:NextRequest){
   try {
     await connectDB()
         const {name,email,password}=await req.json()
-        const existUser=await User.findOne({email})
-        if(existUser){
-          return NextResponse.json({message:"User already exists"},{status:400})
-        }
-
-        if(password.length<6){
-          return NextResponse.json({message:"Password must be at least 6 characters"},{status:400})
+        if(!name?.trim() || !email?.trim() || !password?.trim()){
+          return NextResponse.json({message:"Please fill all fields"},{status:400})
         }
 
         const hashedPassword=await bcrypt.hash(password,10)
-        const user=await User.create({name,email,password:hashedPassword})
+        const user=await User.create({
+          name,
+          email,
+          password:hashedPassword
+        })
         return NextResponse.json(user,{status:200})
 
 
