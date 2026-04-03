@@ -3,6 +3,7 @@ import NextAuth from "next-auth"
 import connectDB from "./lib/db"
 import bcrypt from "bcryptjs"
 import User from "./models/user.model"
+import Google from "next-auth/providers/google"
  
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
@@ -34,25 +35,52 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           }
          
       },
+    }),
+    Google({
+      clientId: process.env.GOOGLE_CLIENT_ID ,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET ,
     })
   ],
   callbacks:{
-       
+       async signIn({user,account}) {
+           if(account?.provider === "google"){
+            await connectDB()
+            if(!user.email){
+              return false
+            }
+
+            let existingUser = await User.findOne({email:user.email})
+            if(!existingUser){
+              existingUser = await User.create({
+                name:user.name || user.email.split("@")[0],
+                email:user.email,
+                image:user.image,
+                role:"user"
+              })
+            }
+
+            user.id = existingUser._id.toString()
+            user.role = existingUser.role
+          }
+          return true
+       },
          jwt({token,user}) {
              if(user){
-              token.id=user.id
-              token.name=user.name
-              token.email=user.email
-              token.role=user.role
+              token.id = user.id ?? token.sub
+              token.name = user.name ?? token.name
+              token.email = user.email ?? token.email
+              token.role = user.role ?? token.role ?? "user"
+              token.picture = user.image ?? token.picture
              }
               return token
          },
          session({session,token}) {
           if(session.user){
-            session.user.id=token.id as string,
-            session.user.name=token.name as string,
-            session.user.email=token.email as string,
-            session.user.role=token.role as string
+            session.user.id = (token.id as string) || ""
+            session.user.name = (token.name as string) || ""
+            session.user.email = (token.email as string) || ""
+            session.user.role = (token.role as string) || "user"
+            session.user.image = (token.picture as string) || undefined
           }
             return session 
          },

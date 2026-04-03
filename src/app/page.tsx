@@ -1,9 +1,13 @@
 import React from "react";
 import Welcome from "../components/Welcome";
+import SessionDebug from "../components/SessionDebug";
 
  function Home() {
   return (
-    <Welcome />
+    <>
+      <Welcome />
+      <SessionDebug />
+    </>
   );
 }
 export default Home;
