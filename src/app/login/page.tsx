@@ -5,7 +5,7 @@ import {motion} from 'motion/react'
 import Image from 'next/image'
 import googleImage from '../../assets/google.png'
 import axios from 'axios'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { signIn, useSession } from 'next-auth/react'
 
 function Login() {
@@ -17,16 +17,28 @@ function Login() {
   const [googleLoading, setGoogleLoading] = React.useState(false)
   const [error,setError] = React.useState('')
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const callbackUrl = searchParams.get('callbackUrl') || '/'
   const session = useSession()
   console.log(session)
+  console.log('Callback URL:', callbackUrl)
+  
   const handleLogin=async (e:React.FormEvent) =>{
     e.preventDefault()
     setLoading(true)
     try{
-      await signIn("credentials", {
+      const result = await signIn("credentials", {
         email: email.trim(),
-        password: password.trim()
+        password: password.trim(),
+        redirect: false
       })
+      
+      if (result?.ok) {
+        router.push(callbackUrl)
+      } else {
+        setError(result?.error || 'Login failed')
+      }
+      router.push("/")
       setLoading(false)
     } catch (error) {
       console.error("Login error")
@@ -37,7 +49,7 @@ function Login() {
   const handleGoogleLogin = async () => {
     if (googleLoading) return
     setGoogleLoading(true)
-    await signIn("google", { callbackUrl: "/" })
+    await signIn("google", { callbackUrl })
   }
   return (
     <div className='flex flex-col items-center justify-center min-h-screen px-6 py-10 bg-white relative'>
@@ -101,15 +113,15 @@ function Login() {
         <span className='border-b border-gray-400 w-full'></span>
       </div>
 
-      <button
-        type='button'
+      <div
+        
         className='w-full py-3 rounded-xl border border-gray-300 bg-white text-gray-700 font-medium inline-flex items-center justify-center gap-2 hover:bg-gray-50 hover:border-gray-400 transition-colors cursor-pointer disabled:cursor-not-allowed disabled:opacity-60'
-        onClick={handleGoogleLogin}
-        disabled={googleLoading}
+        onClick={()=> signIn("google",{callbackUrl:"/"})}
+        
       >
         <Image src={googleImage} alt='Google' className='w-5 h-5' />
         {googleLoading ? 'Redirecting...' : 'Continue with Google'}
-      </button>
+      </div>
       </motion.form>
       <p className='cursor-pointer text-gray-600 mt-6 text-sm flex items-center gap-1' onClick={()=>router.push("/register")}>Want to  create an account? <LogIn className='w-4 h-4'/><span className='text-blue-500 hover:text-blue-700 cursor-pointer'> Sign Up</span></p>
     </div>

@@ -5,8 +5,7 @@ import SessionDebug from "../components/SessionDebug";
  function Home() {
   return (
     <>
-      <Welcome />
-      <SessionDebug />
+      
     </>
   );
 }
