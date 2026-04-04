@@ -28,7 +28,7 @@ function RegisterForm({previousStep}:propType) {
         email:email.trim(),
         password
       })
-      console.log(result.data)
+    router.push("/login")
     }catch (error){
       if (axios.isAxiosError(error)) {
         setError(error.response?.data?.message || 'Registration failed')
@@ -117,15 +117,15 @@ function RegisterForm({previousStep}:propType) {
         <span className='border-b border-gray-400 w-full'></span>
       </div>
 
-      <button
-        type='button'
+      <div
+        
         className='w-full py-3 rounded-xl border border-gray-300 bg-white text-gray-700 font-medium inline-flex items-center justify-center gap-2 hover:bg-gray-50 hover:border-gray-400 transition-colors cursor-pointer disabled:cursor-not-allowed disabled:opacity-60'
-        onClick={handleGoogleSignup}
-        disabled={googleLoading}
+        onClick={()=> signIn("google",{callbackUrl:"/"})}
+        
       >
         <Image src={googleImage} alt='Google' className='w-5 h-5' />
         {googleLoading ? 'Redirecting...' : 'Continue with Google'}
-      </button>
+      </div>
       </motion.form>
       <p className='cursor-pointer text-gray-600 mt-6 text-sm flex items-center gap-1' onClick={()=>router.push("/login")}>Already have an account? <LogIn className='w-4 h-4'/><span className='text-blue-500 hover:text-blue-700 cursor-pointer'> Sign in</span></p>
     </div>
